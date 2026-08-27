@@ -1,0 +1,16 @@
+name = "costafamily-html"
+main = "worker.js"
+account_id = "0a68341689fffbae0284be2321350415"
+compatibility_date = "2025-01-01"
+
+[vars]
+DEPLOY_SOURCE = "hermes-agent"
+
+# Route para costafamily.ai
+[[routes]]
+pattern = "costafamily.ai/*"
+zone_id = "367fbd4a38aca5c99d2e5e309c827915"
+
+[[routes]]
+pattern = "www.costafamily.ai/*"
+zone_id = "367fbd4a38aca5c99d2e5e309c827915"

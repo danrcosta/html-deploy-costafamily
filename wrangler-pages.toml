@@ -1,0 +1,22 @@
+# Cloudflare Pages Configuration
+# Project: costafamily-html
+# Purpose: Deploy HTML files from GitHub → costafamily.ai
+
+name = "costafamily-html"
+account_id = "0a68341689fffbae0284be2321350415"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "ready"
+
+# GitHub repository
+[vars]
+SITE_NAME = "costafamily-html"
+DEPLOY_TARGET = "costafamily.ai"
+
+# Custom routes
+[[routes]]
+pattern = "costafamily.ai/*"
+zone_id = "367fbd4a38aca5c99d2e5e309c827915"
+
+[[routes]]
+pattern = "www.costafamily.ai/*"
+zone_id = "367fbd4a38aca5c99d2e5e309c827915"
