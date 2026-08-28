@@ -59,7 +59,7 @@ def build_report(base_status: int, links: list[dict]) -> str:
     rows = ""
     for l in links:
         status_label = str(l["status"]) if l["status"] >= 0 else "ERR"
-        css = "color:#d4af37" if l["status"] == 200 else "color:#ef4444"
+        css = "ok" if l["status"] == 200 else "fail"
         rows += f'<tr><td class="url">{html.escape(l["url"])}</td><td class="{css}">{status_label}</td></tr>\n'
 
     return f"""<!DOCTYPE html>
