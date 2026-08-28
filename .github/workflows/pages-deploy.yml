@@ -1,0 +1,53 @@
+name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: costafamily-html
+          directory: .
+          branch: main
+
+      - name: Wait for Pages propagation
+        run: sleep 20
+
+      - name: Smoke test Pages URL
+        run: |
+          set -e
+          DEPLOY_URL="https://costafamily-html.pages.dev"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL")
+          echo "Pages URL: $DEPLOY_URL → HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Smoke test failed"
+            exit 1
+          fi
+          echo "✅ Smoke test passed"
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Status
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ Deploy success"
+          else
+            echo "❌ Deploy failed: ${{ needs.deploy.result }}"
+          fi
