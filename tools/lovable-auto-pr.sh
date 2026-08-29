@@ -51,7 +51,7 @@ if [ -z "$CRED_LINE" ]; then
   git checkout "$BASE_BRANCH"
   exit 0
 fi
-TOKEN=$(echo "$CRED_LINE" | sed -E 's/.*:\/\/(.*?):.*/\1/')
+TOKEN=$(echo "$CRED_LINE" | sed -E 's/.*:\/\/(.*?):(.*)@.*/\2/')
 
 REPO=$(git remote get-url origin | sed -E 's#https://[^/]+/([^/]+/[^/.]+)(\.git)?#\1#')
 

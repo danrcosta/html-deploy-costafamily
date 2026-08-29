@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-"""costafamily.ai uptime + broken-link validator → HTML report."""
+"""costafamily-html.pages.dev uptime + broken-link validator → HTML report."""
 import datetime
 import html
-import json
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 try:
     import requests
 except ImportError:
     requests = None
 
-BASE_URL = "https://costafamily.ai"
+BASE_URL = "https://costafamily-html.pages.dev"
 REPORT_DIR = Path.home() / "Hermes-Workspace" / "reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -66,7 +65,7 @@ def build_report(base_status: int, links: list[dict]) -> str:
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>costafamily.ai — Status Report</title>
+<title>costafamily-html.pages.dev — Status Report</title>
 <style>
   :root {{ --bg:#0a0a0a; --fg:#e5e5e5; --muted:#a3a3a3; --accent:#d4af37; --border:#262626; --card:#171717; }}
   * {{ box-sizing:border-box; }}
@@ -89,7 +88,7 @@ def build_report(base_status: int, links: list[dict]) -> str:
 <body>
 <div class="container">
   <div class="header">
-    <h1 style="margin:0 0 6px">costafamily.ai</h1>
+    <h1 style="margin:0 0 6px">costafamily-html.pages.dev</h1>
     <div style="display:flex; gap:8px; align-items:center;">
       <span class="badge">Report</span>
       <span class="badge">Generated {ts}</span>
