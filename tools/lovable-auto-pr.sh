@@ -29,7 +29,12 @@ mkdir -p site-temp
 cp -R "$EXPORT_DIR"/. site-temp/
 
 git add site-temp/
-git diff --cached --quiet && echo "No changes in export; exiting." && git checkout "$BASE_BRANCH" && git branch -d "$PR_BRANCH" && exit 0
+if git diff --cached --quiet; then
+  echo "No changes in export; exiting."
+  git checkout "$BASE_BRANCH"
+  git branch -d "$PR_BRANCH"
+  exit 0
+fi
 
 git commit -m "chore(lovable): auto-export Lovable build → $PR_BRANCH
 
@@ -39,19 +44,26 @@ git commit -m "chore(lovable): auto-export Lovable build → $PR_BRANCH
 
 git push -f origin "$PR_BRANCH"
 
-PR_URL=$(gh pr create \
-  --base "$BASE_BRANCH" \
-  --head "$PR_BRANCH" \
-  --title "Lovable export → $BASE_BRANCH" \
-  --body "Automated PR from Lovable export.
+# Create PR via GitHub API using git-credentials token
+CRED_LINE=$(grep -oP 'https://[^:]+:[^@]+@github\.com' ~/.git-credentials | head -1 || true)
+if [ -z "$CRED_LINE" ]; then
+  echo "WARNING: no GitHub token found in ~/.git-credentials; PR not created."
+  git checkout "$BASE_BRANCH"
+  exit 0
+fi
+TOKEN=$(echo "$CRED_LINE" | sed -E 's/.*:\/\/(.*?):.*/\1/')
 
-**Source:** \`$EXPORT_DIR\`
-**Branch:** \`$PR_BRANCH\`
+REPO=$(git remote get-url origin | sed -E 's#https://[^/]+/([^/]+/[^/.]+)(\.git)?#\1#')
 
-Review the \`site-temp/\` contents before merging." 2>&1) || PR_URL=""
+PR_URL=$(curl -s -o /tmp/pr_response.txt -w "%{http_code}" -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Accept: application/vnd.github+json" \
+  -H "Content-Type: application/json" \
+  "https://api.github.com/repos/$REPO/pulls" \
+  -d "{\"title\": \"Lovable export → $BASE_BRANCH\", \"head\": \"$PR_BRANCH\", \"base\": \"$BASE_BRANCH\", \"body\": \"Automated PR from Lovable export.\n\nSource: $EXPORT_DIR\nBranch: $PR_BRANCH\n\nReview site-temp/ contents before merging.\"}")
 
-if [ -n "$PR_URL" ]; then
-  echo "PR created: $PR_URL"
-else
-  echo "PR creation failed or PR already exists."
+echo "PR response: $PR_URL"
+if [ -f /tmp/pr_response.txt ]; then
+  cat /tmp/pr_response.txt
+  rm -f /tmp/pr_response.txt
 fi
