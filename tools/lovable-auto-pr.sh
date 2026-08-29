@@ -22,20 +22,22 @@ git fetch origin
 git checkout "$BASE_BRANCH"
 git pull origin "$BASE_BRANCH"
 
-git checkout -b "$PR_BRANCH"
+git checkout -B "$PR_BRANCH"
 
 rm -rf site-temp
 mkdir -p site-temp
 cp -R "$EXPORT_DIR"/. site-temp/
 
 git add site-temp/
+git diff --cached --quiet && echo "No changes in export; exiting." && git checkout "$BASE_BRANCH" && git branch -d "$PR_BRANCH" && exit 0
+
 git commit -m "chore(lovable): auto-export Lovable build → $PR_BRANCH
 
 - Source export dir: $EXPORT_DIR
 - Automated via tools/lovable-auto-pr.sh
 - DO NOT MERGE WITHOUT REVIEW"
 
-git push origin "$PR_BRANCH"
+git push -f origin "$PR_BRANCH"
 
 PR_URL=$(gh pr create \
   --base "$BASE_BRANCH" \
